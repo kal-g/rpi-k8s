@@ -90,3 +90,5 @@ CMD="systemctl restart openvpn@$NODE_NAME.service"
 sudo systemctl daemon-reload
 $CMD
 sudo systemctl restart kubelet
+
+echo "Finished setup successfully"
