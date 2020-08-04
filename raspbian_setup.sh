@@ -71,7 +71,22 @@ if [[ ! -f $OVPN_CONF ]]; then
   exit
 fi
 
+if [[ ! -f "/etc/sysctl.d/k8s.conf" ]]; then
+  cat <<EOF | sudo tee /etc/sysctl.d/k8s.conf
+  net.bridge.bridge-nf-call-ip6tables = 1
+  net.bridge.bridge-nf-call-iptables = 1
+EOF
+  sysctl --system
+fi
+
+if [[ ! -f "/etc/default/kubelet" ]]; then
+  cat <<EOF | sudo tee /etc/default/kubelet
+  KUBELET_EXTRA_ARGS="--node-ip=$NODE_IP --hostname-override=$NODE_NAME"
+EOF
+fi
+
 # Start ovpn client
 CMD="systemctl restart openvpn@$NODE_NAME.service"
 sudo systemctl daemon-reload
 $CMD
+sudo systemctl restart kubelet
